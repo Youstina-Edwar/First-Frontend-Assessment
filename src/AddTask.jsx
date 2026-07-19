@@ -11,7 +11,8 @@ function AddTask() {
   const [completed, setCompleted] = useState(false);
   const [error, setError] = useState("");
   const [tasks, setTasks] = useLocalStorage("tasks", []);
-  const [filter , setFilter] = useState("all");
+  const [filter , setFilter] = useState("All");
+  const [searchTask , setSearchTask] = useState("");
   const [editId, setEditId] = useState(null);
   const [editTitle, setEditTitle] = useState("");
   const [editDescription, setEditDescription] = useState("");
@@ -73,9 +74,13 @@ function AddTask() {
     );
   };
   const filteredTasks = tasks.filter((task) => {
-    if (filter === "Active") return !task.completed;
-    if (filter === "Completed") return task.completed;
-    return true;
+    const statusMatch = 
+    filter === "All" ? true :
+    filter === "Active" ? !task.completed :
+    task.completed;
+    
+  const searchMatch = task.title.toLowerCase().includes(searchTask.toLocaleLowerCase());
+    return statusMatch && searchMatch;
   });
 
   return (
@@ -122,6 +127,17 @@ function AddTask() {
       </div>
 
       <div className="mt-12 pb-12">
+         <div className="mb-6 max-w-md">
+        <div className="relative">
+          <input 
+          type="text"
+          placeholder="Search for a task by title.."
+          value={searchTask}
+          onChange={(e) => setSearchTask(e.target.value)}
+          className="w-full pl-4 py-2.5 pr-10 bg-white border border-gray-300 rounded-xl outline-none foucus:ring-2 foucus-ring-blue-300 text-sm transition-shadow shadow-sm"
+          />
+        </div>
+      </div>
       <h2 className="text-3xl font-bold mb-6 text-gray-900">Task Items</h2>
       <div className="flex bg-gray-100 p-1 rounded-xl border border-gray-200 shadow-sm w-full self-start sm:self-auto">
         {["All", "Active", "Completed"].map(status => (
