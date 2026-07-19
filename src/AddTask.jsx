@@ -11,6 +11,7 @@ function AddTask() {
   const [completed, setCompleted] = useState(false);
   const [error, setError] = useState("");
   const [tasks, setTasks] = useLocalStorage("tasks", []);
+  const [filter , setFilter] = useState("all");
   const [editId, setEditId] = useState(null);
   const [editTitle, setEditTitle] = useState("");
   const [editDescription, setEditDescription] = useState("");
@@ -71,7 +72,12 @@ function AddTask() {
       prevTasks.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t))
     );
   };
- 
+  const filteredTasks = tasks.filter((task) => {
+    if (filter === "Active") return !task.completed;
+    if (filter === "Completed") return task.completed;
+    return true;
+  });
+
   return (
     <div className="max-w-4xl mx-auto px-4">
       <h1 className="text-5xl font-bold mb-8 text-gray-900 text-center pt-10">Task Manager</h1>
@@ -117,11 +123,32 @@ function AddTask() {
 
       <div className="mt-12 pb-12">
       <h2 className="text-3xl font-bold mb-6 text-gray-900">Task Items</h2>
+      <div className="flex bg-gray-100 p-1 rounded-xl border border-gray-200 shadow-sm w-full self-start sm:self-auto">
+        {["All", "Active", "Completed"].map(status => (
+          <button 
+            key={status}
+            type="button"
+            onClick={() => setFilter(status)}
+            className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+              filter === status
+                ? "bg-teal-700 text-white shadow-sm"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+            }`}
+          >
+            {status}
+          </button>
+        ))}
+      </div>
         <div className="space-y-4">
-          {tasks.length === 0 ? (
-            <p className="text-center text-gray-400 py-6 border border-dashed border-gray-300 rounded-2xl">No tasks yet</p>
-            ) : (
-            tasks.map((task) => (
+          {filteredTasks.length === 0 ? (
+
+            <div className="text-center py-12 px-4 bg-white border border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center">
+              <p className="text-base font-semibold text-gray-500">
+                {filter === "All" ? "Your task list is empty" : `No ${filter.toLowerCase()} tasks found`}
+              </p>
+            </div>
+          ) : (
+      filteredTasks.sort((a, b) => b.id - a.id).map((task) => (
           <div
             key={task.id}
             className={`bg-white border border-gray-200 p-5 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:shadow-md transition-shadow 
@@ -162,7 +189,7 @@ function AddTask() {
               className={`px-3 py-1.5 rounded-xl border text-xs font-semibold shadow-sm transition-all ${
                         task.completed 
                               ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100" 
-                              : "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100"
+                              : "bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100"
               }`}
             >
             {task.completed ? "Completed" : "Incomplete"}
