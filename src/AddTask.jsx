@@ -1,6 +1,7 @@
 import { useState } from "react";
 import DeleteTask from "./DeleteTask";
 import EditTask from "./EditTask";
+import useLocalStorage from "./Hooks/LocalStorage";
  
 function AddTask() {
 
@@ -9,7 +10,7 @@ function AddTask() {
   const [priority, setPriority] = useState("medium priority");
   const [completed, setCompleted] = useState(false);
   const [error, setError] = useState("");
-  const [tasks, setTasks] = useState([]);
+  const [tasks, setTasks] = useLocalStorage("tasks", []);
   const [editId, setEditId] = useState(null);
   const [editTitle, setEditTitle] = useState("");
   const [editDescription, setEditDescription] = useState("");
@@ -21,7 +22,7 @@ function AddTask() {
     e.preventDefault();
  
     if (title.trim() === "") {
-      setError("Please enter a title for the task.");
+      setError("Please enter a  valid title for the task.");
       return;
     }
 
