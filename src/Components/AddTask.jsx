@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import DeleteTask from "./DeleteTask";
 import EditTask from "./EditTask";
-import useLocalStorage from "./Hooks/LocalStorage";
+import useLocalStorage from "../Hooks/LocalStorage";
+import useTasks from "../Hooks/useTasks";
 import {DragDropContext , Droppable , Draggable} from "@hello-pangea/dnd";
- 
+
 function AddTask() {
 
 
@@ -13,7 +14,6 @@ function AddTask() {
   const [completed, setCompleted] = useState(false);
   const [error, setError] = useState("");
   const [successMessage , setSuccessMessage] = useState("");
-  const [tasks, setTasks] = useLocalStorage("tasks", []);
   const [filter , setFilter] = useState("All");
   const [searchTask , setSearchTask] = useState("");
   const [editId, setEditId] = useState(null);
@@ -22,6 +22,14 @@ function AddTask() {
   const [editPriority, setEditPriority] = useState("medium priority");
   const priorityOptions = ["low priority", "medium priority", "high priority"];
  
+  const { tasks,
+  addTask,
+  deleteTask,
+  toggleComplete,
+  updateTask,
+  reorderTasks,
+  } = useTasks();
+
   const handleSubmit = (e) => {
 
     e.preventDefault();
@@ -41,7 +49,7 @@ function AddTask() {
       completed,
     };
  
-    setTasks((prev) => [newTask , ...prev]);
+    addTask(newTask);
 
     setSuccessMessage("Task added successfully");
     setTimeout(() => {
@@ -54,10 +62,6 @@ function AddTask() {
     setCompleted(false);
   };
 
-  const deleteTask = (id) => {
-    setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id));
-  };
-
   const startEditTask = (task) => {
     setEditId(task.id);
     setEditTitle(task.title);
@@ -65,23 +69,19 @@ function AddTask() {
     setEditPriority(task.priority);
   };
 
+  
   const saveTask = () => {
     if (editTitle.trim() === "") return;
-    setTasks((prevTasks) =>
-      prevTasks.map((t) =>
-        t.id === editId
-          ? { ...t, title: editTitle, description: editDescription, priority: editPriority }: t
-      )
-    );
 
-    setEditId(null);
-  };
- 
-  const toggleComplete = (id) => {
-    setTasks((prevTasks) =>
-      prevTasks.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t))
-    );
-  };
+    updateTask(editId, {
+      title: editTitle,
+      description: editDescription,
+      priority: editPriority,
+    });
+
+  setEditId(null);
+};
+
 
   const handleOnDrag = (result) => {
     if(!result.destination) return;
@@ -91,12 +91,12 @@ function AddTask() {
     const [removed] = reordered.splice(result.source.index , 1);
     reordered.splice(result.destination.index , 0 , removed);
 
-    setTasks((prevTasks) => {
-      const remainingTasks = prevTasks.filter(
+    reorderTasks([
+      ...reordered,
+      ...tasks.filter(
         task => !filteredTasks.some(ft => ft.id === task.id)
-      );
-      return [...reordered , ...remainingTasks]
-    });
+      ),
+    ]);
   }
 
   const filteredTasks = tasks.filter((task) => {
@@ -158,16 +158,16 @@ function AddTask() {
       </div>
 
       <div className="mt-12 pb-12">
-         <div className="mb-6 max-w-md">
-        <div className="relative">
-          <input 
-          type="text"
-          placeholder="Search for a task by title.."
-          value={searchTask}
-          onChange={(e) => setSearchTask(e.target.value)}
-          className="w-full pl-4 py-2.5 pr-10 bg-white border border-gray-300 rounded-xl outline-none foucus:ring-2 foucus-ring-blue-300 text-sm transition-shadow shadow-sm"
-          />
-        </div>
+        <div className="mb-6 max-w-md">
+          <div className="relative">
+            <input 
+            type="text"
+            placeholder="Search for a task by title.."
+            value={searchTask}
+            onChange={(e) => setSearchTask(e.target.value)}
+            className="w-full pl-4 py-2.5 pr-10 bg-white border border-gray-300 rounded-xl outline-none foucus:ring-2 foucus-ring-blue-300 text-sm transition-shadow shadow-sm"
+            />
+          </div>
       </div>
       <h2 className="text-3xl font-bold mb-6 text-gray-900">Task Items</h2>
       <div className="flex bg-gray-100 p-1 rounded-xl border border-gray-200 shadow-sm w-full self-start sm:self-auto">

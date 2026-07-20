@@ -47,7 +47,7 @@ function EditTask({
             className="p-2 border border-gray-300 bg-white rounded-xl outline-none text-sm focus:ring-2 focus:ring-teal-600 "
         >
             <option value="low priority" className="text-green-700 text-lg">Low</option>
-            <option value="medium priority " className="text-yellow-600 text-lg">Medium</option>
+            <option value="medium priority" className="text-yellow-600 text-lg">Medium</option>
             <option value="high priority" className="text-red-600 text-lg">High</option>
         </select>
 
