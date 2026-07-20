@@ -1,15 +1,18 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DeleteTask from "./DeleteTask";
 import EditTask from "./EditTask";
 import useLocalStorage from "./Hooks/LocalStorage";
+import {DragDropContext , Droppable , Draggable} from "@hello-pangea/dnd";
  
 function AddTask() {
+
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState("medium priority");
   const [completed, setCompleted] = useState(false);
   const [error, setError] = useState("");
+  const [successMessage , setSuccessMessage] = useState("");
   const [tasks, setTasks] = useLocalStorage("tasks", []);
   const [filter , setFilter] = useState("All");
   const [searchTask , setSearchTask] = useState("");
@@ -31,14 +34,20 @@ function AddTask() {
     setError("");
  
     const newTask = {
-      id: Date.now(), // Unique ID based on timestamp
+      id: Date.now().toString(), // Unique ID based on timestamp
       title: title.trim(),
       description: description.trim(),
       priority,
       completed,
     };
  
-    setTasks((prev) => [...prev, newTask]);
+    setTasks((prev) => [newTask , ...prev]);
+
+    setSuccessMessage("Task added successfully");
+    setTimeout(() => {
+      setSuccessMessage("");
+    }, 2000);
+
     setTitle("");
     setDescription("");
     setPriority("medium priority");
@@ -73,13 +82,30 @@ function AddTask() {
       prevTasks.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t))
     );
   };
+
+  const handleOnDrag = (result) => {
+    if(!result.destination) return;
+
+    const reordered = [...filteredTasks];
+
+    const [removed] = reordered.splice(result.source.index , 1);
+    reordered.splice(result.destination.index , 0 , removed);
+
+    setTasks((prevTasks) => {
+      const remainingTasks = prevTasks.filter(
+        task => !filteredTasks.some(ft => ft.id === task.id)
+      );
+      return [...reordered , ...remainingTasks]
+    });
+  }
+
   const filteredTasks = tasks.filter((task) => {
     const statusMatch = 
     filter === "All" ? true :
     filter === "Active" ? !task.completed :
     task.completed;
     
-  const searchMatch = task.title.toLowerCase().includes(searchTask.toLocaleLowerCase());
+  const searchMatch = task.title.toLowerCase().includes(searchTask.toLowerCase());
     return statusMatch && searchMatch;
   });
 
@@ -88,6 +114,11 @@ function AddTask() {
       <h1 className="text-5xl font-bold mb-8 text-gray-900 text-center pt-10">Task Manager</h1>
       <div className="bg-white p-6 rounded-xl shadow-md w-full mt-10 border border-gray-100">
         <h2 className="font-semibold mb-5 text-gray-800 text-lg">Add a New Task</h2>
+        {successMessage && (
+          <div className="mb-4 p-3 text-green-600 font-medium text-center">
+            {successMessage}
+            </div>
+        )}
         <form onSubmit={handleSubmit} className="space-y-3">
           <input 
               className="border p-2 w-full border-gray-300 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-teal-600 transition-shadow text-sm"
@@ -155,8 +186,13 @@ function AddTask() {
           </button>
         ))}
       </div>
-        <div className="space-y-4">
-          {filteredTasks.length === 0 ? (
+      <DragDropContext onDragEnd = {handleOnDrag}>
+        <Droppable droppableId = "task-list">
+          {(provided) => (
+            <div className="space-y-4"
+            {...provided.droppableProps}
+            ref = {provided.innerRef}>
+              {filteredTasks.length === 0 ? (
 
             <div className="text-center py-12 px-4 bg-white border border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center">
               <p className="text-base font-semibold text-gray-500">
@@ -164,13 +200,20 @@ function AddTask() {
               </p>
             </div>
           ) : (
-      filteredTasks.sort((a, b) => b.id - a.id).map((task) => (
-          <div
-            key={task.id}
-            className={`bg-white border border-gray-200 p-5 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:shadow-md transition-shadow 
-              ${task.completed ? "bg-gray-50 opacity-75" : ""}`}
+            filteredTasks.map((task,index) => (
+          <Draggable
+            key={String(task.id)}
+            draggableId={String(task.id)}
+            index={index}>
+              {(provided, snapshot) => (
+                <div 
+                ref={provided.innerRef}
+                {...provided.draggableProps}
+                  className={`bg-white border border-gray-200 p-5 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:shadow-md transition-shadow 
+              ${task.completed ? "bg-gray-50 opacity-75" : ""}
+              ${snapshot.isDragging ? "shadow-2xl border-teal-500 scale-[1.01] bg-teal-50/10" : "hover:shadow-md"}`}
           >
-           {editId === task.id ? (
+            {editId === task.id ? (
           <EditTask 
             editTitle={editTitle}
             setEditTitle={setEditTitle}
@@ -182,6 +225,10 @@ function AddTask() {
           />
           ) : (
         <>
+          <div {...provided.dragHandleProps}
+             className="text-gray-400 cursor-grab active:cursor-grabbing select-none text-xl hidden md:block">
+              ⋮⋮
+          </div>
           <div className="flex-1 min-w-0 space-y-1">
             <h3 className={`text-xl font-bold text-gray-900 wrap-break-word 
               ${task.completed ? "line-through text-gray-400" : ""}`}>
@@ -221,14 +268,20 @@ function AddTask() {
             </div>
           </div>
         </>
-       )}
-      </div>
-        ))
+          )}
+          </div>
+          )}
+          </Draggable>
+          ))
         )}
-      </div>
+          {provided.placeholder}
+        </div>
+          )}
+        </Droppable>
+      </DragDropContext>
     </div>
   </div>
-);
+  );
 }
  
 export default AddTask;
