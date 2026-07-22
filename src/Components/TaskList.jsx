@@ -1,20 +1,26 @@
 import { useState } from "react";
-import useTasks from "../Hooks/useTasks";
 import DeleteTask from "./DeleteTask";
 import EditTask from "./EditTask";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
  
-function TaskList() {
-
-  const {
+function TaskList( {
     tasks,
     searchTask,
     editId,
+    setEditId,
+    editTitle,
+    setEditTitle,
+    editDescription,
+    setEditDescription,
+    editPriority,
+    setEditPriority,
+    updateTask,
     startEditTask,
     toggleComplete,
     deleteTask,
     reorderTasks
-  } = useTasks();
+  }) {
+
  
   const [filter, setFilter] = useState("All");
  
@@ -42,6 +48,7 @@ function TaskList() {
         task => !filteredTasks.some((ft) => ft.id === task.id))
     ])
   }
+  
  
   return (
     <div className="max-w-4xl mx-auto px-4 mt-12 pb-12">
@@ -69,12 +76,12 @@ function TaskList() {
               {filteredTasks.length === 0 ? (
                 <div className="text-center py-12 px-4 bg-white border border-dashed border-gray-300 rounded-2xl">
                   <p className="text-base font-semibold text-gray-500">
-                    {tasks.length === 0 ? "Your task list is empty" : searchTask ? `No task matches ${searchTask}` : `No ${filter.toLowerCase()} tasks found`}
+                    {tasks.length === 0 ? "Your task list is empty" : searchTask ? `No task matches "${searchTask}"` : `No ${filter.toLowerCase()} tasks found`}
                   </p>
                 </div>
               ) : (
                 filteredTasks.map((task, index) => (
-                  <Draggable key={String(task.id)} draggableId={String(task.id)} index={index}>
+                  <Draggable key={String(task.id)} draggableId={String(task.id)} index={index} isDragDisabled={editId === task.id}>
                     {(provided, snapshot) => (
                       <div
                         ref={provided.innerRef}
@@ -84,7 +91,17 @@ function TaskList() {
                         } ${snapshot.isDragging ? "shadow-2xl border-teal-500 scale-[1.01] bg-teal-50/10" : "hover:shadow-md"}`}
                       >
                         {editId === task.id ? (
-                        <EditTask />
+                        <EditTask
+                          editId={editId}
+                          setEditId={setEditId}
+                          editTitle={editTitle}
+                          setEditTitle={setEditTitle}
+                          editDescription={editDescription}
+                          setEditDescription={setEditDescription}
+                          editPriority={editPriority}
+                          setEditPriority={setEditPriority}
+                          updateTask={updateTask}
+                        />
                         ) : (
                       <>
                         <div
@@ -101,8 +118,8 @@ function TaskList() {
                         </div>
                         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto justify-end">
                           <span className={`px-3 py-1 rounded-full font-medium text-xs border ${
-                              task.priority === "high priority" ? "bg-red-50 text-red-700 border-red-200" :
-                              task.priority === "medium priority" ? "bg-yellow-50 text-yellow-700 border-yellow-200" :
+                              task.priority === "High priority" ? "bg-red-50 text-red-700 border-red-200" :
+                              task.priority === "Medium priority" ? "bg-yellow-50 text-yellow-700 border-yellow-200" :
                               "bg-green-50 text-green-700 border-green-200"
                             }`}>
                               {task.priority}

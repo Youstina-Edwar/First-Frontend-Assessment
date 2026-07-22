@@ -7,16 +7,20 @@ function DeleteTask({ id, onDelete }) {
   const handleDelete = () => {
       onDelete(id)
       setAlertMessage(false)
-    }
+  }
+
+  const handleShowAlert = () => setAlertMessage(true)
+  const handleCloseAlert = () => setAlertMessage(false)
 
   return (
     <>
-    <button onClick={() => setAlertMessage(true)}
+    <button onClick={handleShowAlert}
+    type="button"
     className="text-red-600 hover:text-red-800 font-semibold transition-colors">
       Delete
     </button>
     { alertMessage && (
-      <div className="fixed inset-0 z-100 flex items-center justify-center">
+      <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/40">
         <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-100">
           <h3>Delete task</h3>
           <p className="text-sm text-gray-500 mb-6">
@@ -25,7 +29,7 @@ function DeleteTask({ id, onDelete }) {
           <div className="flex justify-end gap-3">
             <button
               type="button"
-              onClick={() => setAlertMessage(false)}
+              onClick={handleCloseAlert}
               className="px-4 py-2 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors">
                 Cancel
             </button>

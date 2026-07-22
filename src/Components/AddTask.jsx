@@ -1,9 +1,7 @@
 import {useState} from "react";
-import useTasks from "../Hooks/useTasks";
 
-function AddTask() {
+function AddTask({addTask}) {
 
-  const {addTask} = useTasks();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState("Medium priority");
@@ -36,12 +34,25 @@ function AddTask() {
     setTimeout(() => {
       setSuccessMessage("")
     }, 2000);
- 
+
+    reset();
+
+  };
+  const reset = () => {
     setTitle("");
     setDescription("");
-    setPriority("medium priority");
-  };
- 
+    setPriority("Medium priority");
+  }
+  const handleTitleChange = (e) => { 
+    setTitle(e.target.value);
+    if (e.target.value.trim()) setError("");
+  }
+
+  const handleDescriptionChange = (e) => setDescription(e.target.value)
+
+  const handlePriorityChange = (e) => setPriority(e.target.value)
+
+
   return (
     <div className="max-w-4xl mx-auto px-4">
       <h1 className="text-5xl font-bold mb-8 text-gray-900 text-center pt-10">Task Manager</h1>
@@ -58,23 +69,21 @@ function AddTask() {
           type="text"
           placeholder="Task Title"
           value={title}
-          onChange={(e) => { setTitle(e.target.value);
-            if (e.target.value.trim()) setError("");
-          }}
+          onChange={handleTitleChange}
           />
           {error && <p className="text-red-500 text-xs font-medium">{error}</p>}
           <textarea
           className="border p-2 w-full border-gray-300 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-teal-600 transition-shadow text-sm"
           placeholder="Add a description"
           value={description}
-          onChange={(e) => setDescription(e.target.value)}
+          onChange={handleDescriptionChange}
           rows="3"
           />
           <div className="flex flex-wrap gap-3">
             <select
             className="border p-2 border-gray-300 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-teal-600 transition-colors text-sm"
             value={priority}
-            onChange={(e) => setPriority(e.target.value)}
+            onChange={handlePriorityChange}
             >
             {priorityOptions.map((option) => (
               <option key={option} value={option}>

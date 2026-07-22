@@ -1,8 +1,6 @@
 import { useState } from "react";
-import useTasks from "../Hooks/useTasks";
  
-function EditTask() {
-  const {
+function EditTask({
     editId,
     setEditId,
     editTitle,
@@ -12,7 +10,7 @@ function EditTask() {
     editPriority,
     setEditPriority,
     updateTask,
-  } = useTasks();
+  }){
  
   const [editError, setEditError] = useState("");
  
@@ -23,23 +21,37 @@ function EditTask() {
     }
 
     setEditError("");
+
     updateTask(editId, {
       title: editTitle,
       description: editDescription,
       priority: editPriority,
     });
+
     setEditId(null)
   }
  
+  const handleEditTitle = (e) => {
+      setEditTitle(e.target.value);
+      if (e.target.value.trim()) setEditError("");
+    }
+
+  const handleEditDescription =(e) => {
+      setEditDescription(e.target.value)
+    }
+
+  const handleEditPriority = (e) => {
+    setEditPriority(e.target.value)
+  }
+
+  const cancelEdit  = () => setEditId(null)
+  
   return (
     <div className="flex flex-col gap-2 w-full p-2 bg-gray-50 rounded-2xl">
       <input
         type="text"
         value={editTitle}
-        onChange={(e) => {
-          setEditTitle(e.target.value);
-          if (e.target.value.trim()) setEditError("");
-        }}
+        onChange={handleEditTitle}
         className="text-xl p-2 border border-gray-300 bg-white rounded-xl font-semibold outline-none focus:ring-2 focus:ring-teal-600"
         placeholder="Edit title"
       />
@@ -47,18 +59,18 @@ function EditTask() {
       <input
         type="text"
         value={editDescription}
-        onChange={(e) => setEditDescription(e.target.value)}
+        onChange={handleEditDescription}
         className="text-base text-gray-600 p-2 border border-gray-300 bg-white rounded-xl outline-none focus:ring-2 focus:ring-teal-600"
         placeholder="Edit description"
       />
       <select
         value={editPriority}
-        onChange={(e) => setEditPriority(e.target.value)}
+        onChange={handleEditPriority}
         className="p-2 border border-gray-300 bg-white rounded-xl outline-none text-sm focus:ring-2 focus:ring-teal-600"
       >
-        <option value="low priority">Low</option>
-        <option value="medium priority">Medium</option>
-        <option value="high priority">High</option>
+        <option value="Low priority">Low priority</option>
+        <option value="Medium priority">Medium priority</option>
+        <option value="High priority">High priority</option>
       </select>
 
       <div className="flex gap-2">
@@ -69,7 +81,7 @@ function EditTask() {
           Save Changes
         </button>
         <button
-          onClick={() => setEditId(null)}
+          onClick={cancelEdit}
           className="px-4 py-2 mt-1 rounded-xl bg-gray-300 text-gray-700 hover:bg-gray-400 font-medium transition-colors"
         >
           Cancel

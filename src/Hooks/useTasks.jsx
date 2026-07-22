@@ -1,9 +1,7 @@
-import { createContext, useContext, useState } from "react";
+import { useState } from "react";
 import useLocalStorage from "./LocalStorage";
- 
-const TaskContext = createContext();
 
-export function TaskProvider({ children }) {
+function useTasks() {
 
   const [tasks, setTasks] = useLocalStorage("tasks", []);
 
@@ -11,7 +9,7 @@ export function TaskProvider({ children }) {
   const [editId, setEditId] = useState(null);
   const [editTitle, setEditTitle] = useState("");
   const [editDescription, setEditDescription] = useState("");
-  const [editPriority, setEditPriority] = useState("medium priority");
+  const [editPriority, setEditPriority] = useState("Medium priority");
  
   const addTask = (newTask) => {
     setTasks((prev) => [newTask, ...prev]);
@@ -47,9 +45,7 @@ export function TaskProvider({ children }) {
     setEditPriority(task.priority);
   };
  
-  return (
-    <TaskContext.Provider
-      value={{
+  return {
         tasks,
         searchTask,
         setSearchTask,
@@ -67,14 +63,8 @@ export function TaskProvider({ children }) {
         updateTask,
         reorderTasks,
         startEditTask,
-      }}
-    >
-      {children}
-    </TaskContext.Provider>
-  );
+  }
 }
- 
-export default function useTasks() {
-  return useContext(TaskContext);
-}
+
+export default useTasks
  

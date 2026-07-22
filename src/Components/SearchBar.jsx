@@ -1,8 +1,5 @@
-import useTasks from "../Hooks/useTasks";
 
-function SearchBar() {
-
-  const { searchTask, setSearchTask } = useTasks();
+function SearchBar({ searchTask, setSearchTask }) {
  
   return (
     <div className="max-w-4xl mx-auto px-4 mt-6">
